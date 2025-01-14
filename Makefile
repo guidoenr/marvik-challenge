@@ -1,11 +1,25 @@
+# some vars
+CONTAINER_NAME=marvik-api-container
+IMAGE_NAME=marvik-api
+PORT=8080
+
+# build the Docker image
 build:
-	docker build . -t marvik-api
+	docker build . -t $(IMAGE_NAME)
 
-clean:
-	docker rmi -f marvik-api
-
+# run the container
 run:
-	docker run -d --name marvik-api-container -p 8080:8080 marvik-api
+	docker run --rm -it --name $(CONTAINER_NAME) -p $(PORT):$(PORT) $(IMAGE_NAME)
 
+# clean up trash
+clean:
+	docker kill $(CONTAINER_NAME)
+	docker rm $(CONTAINER_NAME)
+	docker rmi -f $(IMAGE_NAME)
+
+
+# enter to the container to drop commands
 exec:
-	docker exec -it marvik-api-container /bin/bash
+	docker exec -it $(CONTAINER_NAME) /bin/bash
+
+
