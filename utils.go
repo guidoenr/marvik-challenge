@@ -5,17 +5,60 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strconv"
+	"strings"
 	"time"
 )
 
-// incrementCounter is the counter each 10 seconds
-func incrementCounter() {
+// BuildQuery dynamically builds the SQL query with filters
+func BuildQuery(filters map[string]string) (string, []interface{}) {
+	var conditions []string
+	var args []interface{}
+	argIndex := 1
+
+	baseQuery := `
+		SELECT u.id, u.name, u.surname, u.email, array_agg(o.name) AS organizations
+		FROM users u
+		LEFT JOIN user_organizations uo ON u.id = uo.user_id
+		LEFT JOIN organizations o ON o.id = uo.organization_id
+	`
+
+	for field, value := range filters {
+		if value != "" {
+			if field == "organization" {
+				// Adjusted for the organization filter
+				conditions = append(conditions, "LOWER(o.name) = LOWER($"+strconv.Itoa(argIndex)+")")
+			} else {
+				conditions = append(conditions, "LOWER(u."+field+") = LOWER($"+strconv.Itoa(argIndex)+")")
+			}
+			args = append(args, value)
+			argIndex++
+		}
+	}
+
+	if len(conditions) > 0 {
+		baseQuery += " WHERE " + strings.Join(conditions, " AND ")
+	}
+
+	baseQuery += " GROUP BY u.id"
+	return baseQuery, args
+}
+
+// incrementCounter is the counter each 1 minute
+func incrementGlobalCounter() {
 	counter := 0
 	for {
-		time.Sleep(10 * time.Second)
+		time.Sleep(1 * time.Minute)
 		counter++
-		log.Info().Msgf("GLOBAL counter: %d", counter)
+		log.Info().Msgf("GLOBAL counter (updatead each 1 minute): %d", counter)
 	}
+}
+
+// incrementCounter increments the counter for a given endpoint
+func updateCounter(endpoint string) {
+	mu.Lock()
+	defer mu.Unlock()
+	counters[endpoint]++
 }
 
 // connectToDb tries to connect to the PostgreSQL DB
