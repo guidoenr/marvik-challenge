@@ -13,7 +13,7 @@ RUN go build -o app .
 # STAGE 2: init postgresql and load it with data
 FROM postgres:17.2-alpine3.21 AS BASE
 
-# (this makes the image start that script)
+# (this makes the image start with the init.sql script)
 COPY init.sql /docker-entrypoint-initdb.d/
 
 # default PSQL creds
@@ -25,5 +25,5 @@ COPY --from=builder /app/app /usr/local/bin/app
 
 EXPOSE 8080
 
-ENTRYPOINT ["sh", "-c", "docker-entrypoint.sh postgres & sleep 5 && app"]
+ENTRYPOINT ["sh", "-c", "docker-entrypoint.sh postgres & sleep 3 && app"]
 

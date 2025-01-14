@@ -7,9 +7,11 @@ PORT=8080
 build:
 	docker build . -t $(IMAGE_NAME)
 
+
 # run the container
 run:
 	docker run --rm -it --name $(CONTAINER_NAME) -p $(PORT):$(PORT) $(IMAGE_NAME)
+
 
 # clean up trash
 clean:
