@@ -1,48 +1,57 @@
 package main
 
 import (
-	"database/sql"
 	"net/http"
 	"sync"
 
 	"github.com/gin-gonic/gin"
-	"github.com/lib/pq" // Import pq to handle array scanning
-	_ "github.com/lib/pq"
 	"github.com/rs/zerolog"
+	"gorm.io/gorm"
 )
 
-// declare the global logger and DB connection at the package level
-var db *sql.DB
-var log zerolog.Logger // declaring it globally for easy access
+// DB and Logger must be global.
+var db *gorm.DB
+var log zerolog.Logger
 
-// declare a global map to track endpoint counters
+// counters map to handle each endpoint counter
 var counters = make(map[string]int)
-var mu sync.Mutex // mutex to protect concurrent access to the counters map
+var mu sync.Mutex
 
-// user struct defines the data model for user
-type User struct {
-	ID            int      `json:"id"`
-	Name          string   `json:"name"`
-	Surname       string   `json:"surname"`
-	Email         string   `json:"email"`
-	Organizations []string `json:"organizations"`
-}
-
-// countersHandler returns the number of times each endpoint was accessed
-func countersHandler(c *gin.Context) {
+// getCounters returns the number of times each endpoint was accessed
+func getCounters(c *gin.Context) {
 	updateCounter("/counters")
 	mu.Lock()
 	defer mu.Unlock()
 
-	// counters map
+	// Return counters map as JSON
 	c.JSON(http.StatusOK, counters)
 }
 
-// getUsers fetches the users from the database, applying filters if provided
+// getOrganizations fetch all the organizations with their associated users
+func getOrganizations(c *gin.Context) {
+	updateCounter("/organizations")
+
+	// fetch organizations with preloaded users
+	var organizations []Organization
+	err := db.Preload("Users").Find(&organizations).Error
+	if err != nil {
+		log.Error().Err(err).Msg("error fetching organizations")
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "error fetching organizations",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	log.Info().Msgf("%d organizations fetched successfully", len(organizations))
+	c.JSON(http.StatusOK, organizations)
+}
+
+// getUsers fetch all the users from the DB
 func getUsers(c *gin.Context) {
 	updateCounter("/users")
 
-	// Get query parameters (filters)
+	// get the query parameters (filters)
 	filters := map[string]string{
 		"name":         c.DefaultQuery("name", ""),
 		"surname":      c.DefaultQuery("surname", ""),
@@ -50,37 +59,34 @@ func getUsers(c *gin.Context) {
 		"organization": c.DefaultQuery("organization", ""),
 	}
 
-	// Build SQL query based on filters
-	baseQuery, args := BuildQuery(filters)
+	// preload the full Organizations struct
+	query := db.Preload("Organizations")
 
-	// Execute the query
-	rows, err := db.Query(baseQuery, args...)
+	// apply filters if they are provided
+	if filters["name"] != "" {
+		query = query.Where("name ILIKE ?", "%"+filters["name"]+"%")
+	}
+	if filters["surname"] != "" {
+		query = query.Where("surname ILIKE ?", "%"+filters["surname"]+"%")
+	}
+	if filters["email"] != "" {
+		query = query.Where("email ILIKE ?", "%"+filters["email"]+"%")
+	}
+	if filters["organization"] != "" {
+		query = query.Joins("JOIN user_organizations ON user_organizations.user_id = users.id").
+			Joins("JOIN organizations ON organizations.id = user_organizations.organization_id").
+			Where("organizations.name ILIKE ?", "%"+filters["organization"]+"%")
+	}
+
+	// fetch the users
+	var users []User
+	err := query.Find(&users).Error
 	if err != nil {
 		log.Error().Err(err).Msg("error fetching users")
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "error fetching users"})
-		return
-	}
-	defer rows.Close()
-
-	// Store users
-	var users []User
-	for rows.Next() {
-		var user User
-		var organizations pq.StringArray
-		err := rows.Scan(&user.ID, &user.Name, &user.Surname, &user.Email, &organizations)
-		if err != nil {
-			log.Error().Err(err).Msg("error reading data")
-			c.JSON(http.StatusInternalServerError, gin.H{"message": "error reading data", "error": err.Error()})
-			return
-		}
-
-		user.Organizations = []string(organizations)
-		users = append(users, user)
-	}
-
-	if err := rows.Err(); err != nil {
-		log.Error().Err(err).Msg("error getting rows")
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "error getting rows"})
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "error fetching users",
+			"error":   err.Error(),
+		})
 		return
 	}
 
@@ -88,34 +94,69 @@ func getUsers(c *gin.Context) {
 	c.JSON(http.StatusOK, users)
 }
 
+// getUserOrganizations fetch all user-organization relationships from the DB
+func getUserOrganizations(c *gin.Context) {
+	updateCounter("/user_organizations")
+
+	// Fetch all user-organization associations
+	var userOrganizations []struct {
+		UserID           uint   `json:"user_id"`
+		UserName         string `json:"user_name"`
+		OrganizationID   uint   `json:"organization_id"`
+		OrganizationName string `json:"organization_name"`
+	}
+
+	// Perform the query with joins to get the related user and organization data
+	err := db.Table("user_organizations").
+		Select("user_organizations.user_id, users.name as user_name, user_organizations.organization_id, organizations.name as organization_name").
+		Joins("JOIN users ON users.id = user_organizations.user_id").
+		Joins("JOIN organizations ON organizations.id = user_organizations.organization_id").
+		Find(&userOrganizations).Error
+
+	if err != nil {
+		log.Error().Err(err).Msg("error fetching user-organization associations")
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "error fetching user-organization associations",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	log.Info().Msgf("%d user-organization associations fetched successfully", len(userOrganizations))
+	c.JSON(http.StatusOK, userOrganizations)
+}
+
 // helloWorld returns a ready message to check if the API is ready
 func helloWorld(c *gin.Context) {
 	updateCounter("/")
-	log.Info().Msg("API is ready ...")
 	c.JSON(http.StatusOK, gin.H{"status": "ready"})
 }
 
 func main() {
-	// GLOBAL counter
-	go incrementGlobalCounter()
+	go startGlobalCounter()
 
 	connectToDb()
-	defer db.Close()
+
+	// close the DB when the app ends
+	defer func() {
+		sqlDB, err := db.DB()
+		if err == nil {
+			sqlDB.Close()
+		}
+	}()
 
 	log = InitLogger()
 	banner()
 
-	// endpoints!!!
+	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 
 	router.GET("/", helloWorld)
 	router.GET("/users", getUsers)
-	router.GET("/counters", countersHandler)
+	router.GET("/counters", getCounters)
+	router.GET("/organizations", getOrganizations)
+	router.GET("/user_organizations", getUserOrganizations)
 
-	// set release and NOT debug mode
-	gin.SetMode(gin.ReleaseMode)
-
-	// run the server
 	err := router.Run(":8080")
 	if err != nil {
 		log.Fatal().Err(err).Msg("error starting server")
