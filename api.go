@@ -1,25 +1,18 @@
 package main
 
 import (
-	"net/http"
-	"sync"
-
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
 	"gorm.io/gorm"
+	"net/http"
 )
-
-// a mutex to avoid the race condition when summing
-var mu sync.Mutex
 
 var log zerolog.Logger
 
 // getCounters returns the number of times each endpoint was accessed
 func getCounters(c *gin.Context) {
 	updateCounter("/counters")
-	mu.Lock()
 	c.JSON(http.StatusOK, counters)
-	mu.Unlock()
 }
 
 // getOrganizations fetch all the organizations with their associated users

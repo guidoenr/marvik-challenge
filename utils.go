@@ -28,6 +28,7 @@ func banner() {
 }
 
 // startGlobalCounter starts the global counter counting.
+// its gets updated each 1 minute
 func startGlobalCounter() {
 	counter := 0
 	for {

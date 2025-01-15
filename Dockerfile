@@ -24,6 +24,7 @@ ENV POSTGRES_DB=postgres
 # DEFAULT DEBUG MODE (disable later)
 ENV DEBUG=true
 
+# copy the app's binary
 COPY --from=builder /app/app /usr/local/bin/app
 
 EXPOSE 8080
