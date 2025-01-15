@@ -2,9 +2,7 @@
 # marvik-challenge by @guidoenr
 
 ## Descripción
-Este proyecto es una API construida con **Gin** en Go y **PostgreSQL**. 
-
-Resuelve el enunciado recibido por mail usando tecnologias como Docker, Makefile, PostgreSQL para los datos, y Golang para el server.
+este proyecto resuelve el enunciado recibido por mail usando tecnologias como Docker, Makefile, PostgreSQL para los datos, y Golang para el server.
 
 ## Requisitos
 Para ejecutar la aplicación, deberias tener instalados lo siguiente:
@@ -13,13 +11,13 @@ Para ejecutar la aplicación, deberias tener instalados lo siguiente:
 - [**Make**](https://www.geeksforgeeks.org/how-to-install-make-on-ubuntu/)
 
 
-## Cómo ejecutar la aplicación
+## Correr la aplicación
 podes ejecutar todo con un solo comando:
 
 ```shell
 make build run
 ```
-esperar a que la api este lista, donde veras en la terminal algo como:
+y esperar a que la api este lista, donde veras en la terminal algo como:
 ```shell
 =====================================
    Marvik Challenge by @guidoenr     
@@ -46,13 +44,13 @@ O en caso de que querer hacer el paso-a-paso, puedes:
    make run
    ```
 
-3. **limpiar containers/imagenes**:
+3. (📌 optional) **limpiar containers/imagenes**:
    ```bash
    make clean
    ```
 
 
-4. **entrar al container**:
+4. (📌 optional) **entrar al container**:
    ```bash
    make exec
    ```
@@ -61,6 +59,7 @@ O en caso de que querer hacer el paso-a-paso, puedes:
 debajo esta el listado de todos los endpoints disponible para la API con ejemplos de respuestas al acceder.
 
 ### 1. **`GET /`**
+lo que podria llamarse el home page de la api, retorna solamente un mensaje diciendo que esta ready.
 ```bash
 curl -X GET http://localhost:8080/
 ```
@@ -192,3 +191,22 @@ esto iniciara las pruebas y verificará que todo funcione correctamente.
 > dado que estas hacen request literales a los endpoints reales.
 > (de todas formas los tests no se ejecutaran si la API no esta levantada)
 
+
+### Enunciado
+```
+Implementar una API en Golang que:
+
+a) se comunique con una base de datos (a elección) que tenga una tabla de usuarios con por lo menos los campos nombre, apellido y mail del usuario
+
+b) reciba un request que tenga filtros de búsqueda sobre la tabla usuarios y devuelva la lista de usuarios que cumplen con el criterio de búsqueda, paginando en el backend
+
+c) reciba un request GET que obtenga el valor de un contador de veces que fue llamado alguno de los endpoints disponibles
+
+d) cada 5 minutos incremente un segundo contador e imprima su valor a un log o consola
+
+Compartir también el esquema de la base de datos. Te pedimos que el código lo compartas con Github en un repositorio privado compartiendo el código al usuario PeopleMarvik o simplemente como archivos adjuntos. Dejar en el README instrucciones para correr la API localmente y/o en un server en producción.
+
+Nice to have:
+
+Permitir que los usuarios puedan pertenecer a una o múltiples organizaciones y en el request de búsqueda de usuarios devolver la lista de organizaciones a las que pertenece el usuario
+```
