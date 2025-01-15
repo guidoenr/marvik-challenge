@@ -1,7 +1,7 @@
 
 # Marvik challenge by @guidoenr
 
-> [!TIP]
+> [!WARNING]
 > Este proyecto fue testeado en Kali Linux 2024 (Debian-based linux). \
 > No se hicieron pruebas en O.S como Windows/MacOS. \
 > De todas formas, **no** deberian existir problemas dado que todo vive en una imagen de docker.
@@ -48,19 +48,19 @@ luego esperar a que la api este lista, donde se verá en la terminal algo como:
    make run
    ```
 
-3. (📌 optional) **limpiar containers/imagenes**:
+3. **limpiar containers/imagenes** 📌 (*opcional*):
    ```bash
    make clean
    ```
 
 
-4. (📌 optional) **entrar al container**:
+4. **entrar al container** 📌 (*opcional*) :
    ```bash
    make exec
    ```
    
 ## Endpoints
-debajo esta el listado con todos los endpoints disponibles en la API, con ejemplos de responses/requests en cada una.
+debajo se encuentra el listado con todos los endpoints disponibles en la API, con ejemplos de responses/requests en cada una.
 
 ### 1. **`GET /`**
 lo que podria llamarse el home page -- retorna solamente un mensaje diciendo que esta ready.
@@ -77,7 +77,7 @@ curl -X GET http://localhost:8080/
 ### 2. **`GET /users`**
 todos los usuarios y la lista de organizaciones a las que este pertenecen.
 
-> [!IMPORTANT]
+> [!TIP]
 > este endpoint tiene la capacidad de recibir **filtros** en forma de `QueryParams`
 
 por ejemplo:
@@ -134,8 +134,8 @@ curl -X GET http://localhost:8080/organizations
 ```
 
 ### 4. **`GET /counters`**
-un mapa de contadores por aca endpoint disponible.
-> (el propio endpoint `/counters` tambien tiene un contador y es actualizado al actualizar la pagina)
+un mapa de contadores para cada endpoint disponible.
+> *(el propio endpoint `/counters` tambien tiene un contador y es actualizado al actualizar la pagina)*
 
 ```bash
 curl -X GET http://localhost:8080/counters
@@ -151,7 +151,9 @@ curl -X GET http://localhost:8080/counters
 
 ## DB Schema
 
-el esquema de la base de datos contiene dos tablas principales: **Usuarios** y **Organizaciones**, con una relación de muchos a muchos entre ellas.
+El esquema de la base de datos contiene dos tablas principales: 
+
+**Usuarios** y **Organizaciones**, con una relación de muchos a muchos entre ellas (*y obviamente la tabla intermedia para JOINS*)
 
 ```
 users
@@ -198,7 +200,7 @@ esto iniciara las pruebas y verificará que todo funcione correctamente.
 > (de todas formas los tests no se ejecutaran si la API no esta levantada)
 
 
-### Enunciado
+#### Enunciado
 ```
 Implementar una API en Golang que:
 
