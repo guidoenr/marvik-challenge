@@ -1,7 +1,7 @@
 
 # Marvik challenge by @guidoenr
 
-> [!INFO]
+> [!TIP]
 > Este proyecto fue testeado en Kali Linux 2024 (Debian-based linux). \
 > No se hicieron pruebas en O.S como Windows/MacOS. \
 > De todas formas, **no** deberian existir problemas dado que todo vive en una imagen de docker.
