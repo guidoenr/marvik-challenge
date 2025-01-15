@@ -18,11 +18,11 @@ Para poder correr la aplicación, debes tener instalado lo siguiente:
 
 ## Usage / Correr la aplicación
 para poder levantar el server/api en un solo comando:
-```shell
+```make
 make build run
 ```
 luego esperar a que la api este lista, donde se verá en la terminal algo como:
-```shell
+```python
 =====================================
    Marvik Challenge by @guidoenr     
 =====================================
@@ -39,12 +39,12 @@ luego esperar a que la api este lista, donde se verá en la terminal algo como:
 (en caso de que querer hacer el paso-a-paso) puedes:
 
 1. **construir la imagen de Docker**:
-   ```bash
+   ```makefile
    make build
    ```
 
 2. **iniciar el container**:
-   ```bash
+   ```make
    make run
    ```
 
