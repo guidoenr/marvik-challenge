@@ -39,12 +39,12 @@ luego esperar a que la api este lista, donde se verá en la terminal algo como:
 (en caso de que querer hacer el paso-a-paso) puedes:
 
 1. **construir la imagen de Docker**:
-   ```makefile
+   ```bash
    make build
    ```
 
 2. **iniciar el container**:
-   ```make
+   ```bash
    make run
    ```
 
