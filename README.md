@@ -17,7 +17,12 @@ Para poder correr la aplicación, debes tener instalado lo siguiente:
 
 
 ## Usage / Correr la aplicación
-para poder levantar el server/api en un solo comando:
+1. clonar este repositorio
+```git
+git clone https://github.com/guidoenr/marvik-challenge
+```
+
+2. correr la app
 ```make
 make build run
 ```
