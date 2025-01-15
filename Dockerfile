@@ -21,11 +21,14 @@ ENV POSTGRES_USER=postgres
 ENV POSTGRES_PASSWORD=mysecretpassword
 ENV POSTGRES_DB=postgres
 
+# DEFAULT DEBUG MODE (disable later)
+ENV DEBUG=true
+
 COPY --from=builder /app/app /usr/local/bin/app
 
 EXPOSE 8080
 
-# start the default entry point and sleep for 5 seconds (to wait for the DB initalization)
-ENTRYPOINT ["sh", "-c", "docker-entrypoint.sh postgres & while ! pg_isready -h localhost -p 5432 -U postgres; do echo 'Waiting for database...'; sleep 2; done; app"]
+# start the default entry point until pg_isready 
+ENTRYPOINT ["sh", "-c", "docker-entrypoint.sh postgres & while ! pg_isready -h localhost -p 5432 -U postgres; do echo 'waiting for database...'; sleep 1; done; app"]
 
 

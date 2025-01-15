@@ -6,25 +6,19 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
-	"gorm.io/gorm"
 )
 
-// DB and Logger must be global.
-var db *gorm.DB
-var log zerolog.Logger
-
-// counters map to handle each endpoint counter
-var counters = make(map[string]int)
+// a mutex to avoid the race condition when summing
 var mu sync.Mutex
+
+var log zerolog.Logger
 
 // getCounters returns the number of times each endpoint was accessed
 func getCounters(c *gin.Context) {
 	updateCounter("/counters")
 	mu.Lock()
-	defer mu.Unlock()
-
-	// Return counters map as JSON
 	c.JSON(http.StatusOK, counters)
+	mu.Unlock()
 }
 
 // getOrganizations fetch all the organizations with their associated users
@@ -94,38 +88,6 @@ func getUsers(c *gin.Context) {
 	c.JSON(http.StatusOK, users)
 }
 
-// getUserOrganizations fetch all user-organization relationships from the DB
-func getUserOrganizations(c *gin.Context) {
-	updateCounter("/user_organizations")
-
-	// Fetch all user-organization associations
-	var userOrganizations []struct {
-		UserID           uint   `json:"user_id"`
-		UserName         string `json:"user_name"`
-		OrganizationID   uint   `json:"organization_id"`
-		OrganizationName string `json:"organization_name"`
-	}
-
-	// Perform the query with joins to get the related user and organization data
-	err := db.Table("user_organizations").
-		Select("user_organizations.user_id, users.name as user_name, user_organizations.organization_id, organizations.name as organization_name").
-		Joins("JOIN users ON users.id = user_organizations.user_id").
-		Joins("JOIN organizations ON organizations.id = user_organizations.organization_id").
-		Find(&userOrganizations).Error
-
-	if err != nil {
-		log.Error().Err(err).Msg("error fetching user-organization associations")
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "error fetching user-organization associations",
-			"error":   err.Error(),
-		})
-		return
-	}
-
-	log.Info().Msgf("%d user-organization associations fetched successfully", len(userOrganizations))
-	c.JSON(http.StatusOK, userOrganizations)
-}
-
 // helloWorld returns a ready message to check if the API is ready
 func helloWorld(c *gin.Context) {
 	updateCounter("/")
@@ -133,9 +95,15 @@ func helloWorld(c *gin.Context) {
 }
 
 func main() {
-	go startGlobalCounter()
-
+	// connect to the database first
 	connectToDb()
+	// start the global counter (updated each 1 minute)
+	// and start the general counters manager
+	go startGlobalCounter()
+	go startCountersManager()
+
+	// close the channel when the server ends
+	defer close(counterUpdates)
 
 	// close the DB when the app ends
 	defer func() {
@@ -155,10 +123,10 @@ func main() {
 	router.GET("/users", getUsers)
 	router.GET("/counters", getCounters)
 	router.GET("/organizations", getOrganizations)
-	router.GET("/user_organizations", getUserOrganizations)
 
 	err := router.Run(":8080")
 	if err != nil {
 		log.Fatal().Err(err).Msg("error starting server")
 	}
+
 }

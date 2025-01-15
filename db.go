@@ -2,10 +2,13 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"os"
 )
+
+var db *gorm.DB
 
 // User defines the data for a User, and the `gorm`|`json` tags to map in the table later and retrieve info from the api.
 type User struct {
@@ -16,15 +19,16 @@ type User struct {
 	Organizations []Organization `gorm:"many2many:user_organizations;" json:"organizations"`
 }
 
-// Organization defines the data for the organization and the `gorm` tags
+// Organization defines the data for the organization and the `gorm`|`json` tags
 type Organization struct {
 	ID    uint   `gorm:"primaryKey" json:"id"`
 	Name  string `gorm:"size:100;not null" json:"name"`
-	Users []User `gorm:"many2many:user_organizations;" json:"users"` // Correct relationship setup here
+	Users []User `gorm:"many2many:user_organizations;" json:"users"`
 }
 
 // connectToDb connects to the postgresql database
 func connectToDb() {
+	log.Debug().Msg("connecting to PostgreSQL db ...")
 	var err error
 
 	// first get the ENV vars with the POSTGRESQL
@@ -46,6 +50,6 @@ func connectToDb() {
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to run migrations")
 	} else {
-		log.Info().Msg("Migrations completed successfully")
+		log.Info().Msg("migrations done successfully")
 	}
 }
