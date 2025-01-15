@@ -41,29 +41,18 @@ luego esperar a que la api este lista, donde se verá en la terminal algo como:
 2025-01-15T13:24:55Z INF http://localhost:8080/
 ```
 
-(en caso de que querer hacer el paso-a-paso) puedes:
+> algunas instrucciones extras que podrian ser de utilidad:
 
-1. **construir la imagen de Docker**:
-   ```bash
-   make build
-   ```
+**limpiar containers/imagenes** 📌 (*opcional*):
+```bash
+make clean
+```
 
-2. **iniciar el container**:
-   ```bash
-   make run
-   ```
+**entrar al container** 📌 (*opcional*) :
+```bash
+make exec
+```
 
-3. **limpiar containers/imagenes** 📌 (*opcional*):
-   ```bash
-   make clean
-   ```
-
-
-4. **entrar al container** 📌 (*opcional*) :
-   ```bash
-   make exec
-   ```
-   
 ## Endpoints
 debajo se encuentra el listado con todos los endpoints disponibles en la API, con ejemplos de responses/requests en cada una.
 
