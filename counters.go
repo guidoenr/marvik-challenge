@@ -22,7 +22,7 @@ func startCountersManager() {
 	// channel to hold the ''update tasks''
 	counterUpdates = make(chan string)
 
-	// this routines listen to the channel and the do the updates
+	// this routine listens to the channel and the do the updates
 	go func() {
 		for endpoint := range counterUpdates {
 			counters[endpoint]++

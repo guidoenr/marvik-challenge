@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
+	"gorm.io/gorm"
 )
 
 // a mutex to avoid the race condition when summing
@@ -53,7 +54,8 @@ func getUsers(c *gin.Context) {
 		"organization": c.DefaultQuery("organization", ""),
 	}
 
-	// preload the full Organizations struct
+	// preload the full Organizations table
+	// this happens because a relationship exists between tables
 	query := db.Preload("Organizations")
 
 	// apply filters if they are provided
@@ -66,10 +68,14 @@ func getUsers(c *gin.Context) {
 	if filters["email"] != "" {
 		query = query.Where("email ILIKE ?", "%"+filters["email"]+"%")
 	}
+
+	// if the 'organization' query param is found, preload Organizations with a filter condition
+	// this will only include organizations whose name matches the filter
 	if filters["organization"] != "" {
-		query = query.Joins("JOIN user_organizations ON user_organizations.user_id = users.id").
-			Joins("JOIN organizations ON organizations.id = user_organizations.organization_id").
-			Where("organizations.name ILIKE ?", "%"+filters["organization"]+"%")
+		query = query.Preload("Organizations", func(db *gorm.DB) *gorm.DB {
+			// this applies a filter to the related Organizations table
+			return db.Where("organizations.name ILIKE ?", "%"+filters["organization"]+"%")
+		})
 	}
 
 	// fetch the users
@@ -128,5 +134,4 @@ func main() {
 	if err != nil {
 		log.Fatal().Err(err).Msg("error starting server")
 	}
-
 }

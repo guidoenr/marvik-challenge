@@ -16,14 +16,14 @@ type User struct {
 	Name          string         `gorm:"size:50;not null" json:"name"`
 	Surname       string         `gorm:"size:50;not null" json:"surname"`
 	Email         string         `gorm:"size:100;unique;not null" json:"email"`
-	Organizations []Organization `gorm:"many2many:user_organizations;" json:"organizations"`
+	Organizations []Organization `gorm:"many2many:user_organizations;" json:"organizations,omitempty"`
 }
 
 // Organization defines the data for the organization and the `gorm`|`json` tags
 type Organization struct {
 	ID    uint   `gorm:"primaryKey" json:"id"`
 	Name  string `gorm:"size:100;not null" json:"name"`
-	Users []User `gorm:"many2many:user_organizations;" json:"users"`
+	Users []User `gorm:"many2many:user_organizations;" json:"users,omitempty"`
 }
 
 // connectToDb connects to the postgresql database
