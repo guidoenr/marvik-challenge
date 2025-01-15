@@ -2,9 +2,9 @@
 # marvik-challenge by @guidoenr
 
 > [!WARNING]
-> Este proyecto fue testeado en Kali Linux 2024 (Debian-based linux).
-> No se hicieron pruebas en O.S como Windows/MacOS.
-> No deberian existir problemas dado que todo vive en una imagen de docker.
+> Este proyecto fue testeado en Kali Linux 2024 (Debian-based linux). \
+> No se hicieron pruebas en O.S como Windows/MacOS. \
+> De todas formas, deberian existir problemas dado que todo vive en una imagen de docker.
 
 ## Descripción
 este proyecto resuelve el enunciado recibido por mail usando tecnologias como Docker, Makefile, PostgreSQL para los datos, y Golang para el server.
