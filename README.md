@@ -1,11 +1,16 @@
 
 # marvik-challenge by @guidoenr
 
+> [!WARNING]
+> Este proyecto fue testeado en Kali Linux 2024 (Debian-based linux).
+> No se hicieron pruebas en O.S como Windows/MacOS.
+> No deberian existir problemas dado que todo vive en una imagen de docker.
+
 ## Descripción
 este proyecto resuelve el enunciado recibido por mail usando tecnologias como Docker, Makefile, PostgreSQL para los datos, y Golang para el server.
 
 ## Requisitos
-Para ejecutar la aplicación, deberias tener instalados lo siguiente:
+para poder correr la aplicación, deberias tener instalado lo siguiente:
 
 - [**Docker**](https://www.docker.com/)
 - [**Make**](https://www.geeksforgeeks.org/how-to-install-make-on-ubuntu/)
@@ -81,7 +86,7 @@ por ejemplo:
 curl -X GET "http://localhost:8080/users?name=Guido"
 curl -X GET "http://localhost:8080/users?organization=Veritone"
 curl -X GET "http://localhost:8080/users?email=john.doe@example.com"
-curl -X GET "http://localhost:8080/users?name=John?surname=Doe?email=@john.doe@example.com"
+curl -X GET "http://localhost:8080/users?name=John&surname=Doe&email=@john.doe@example.com"
 ```
 
 
