@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS user_organizations (
     PRIMARY KEY (user_id, organization_id)
 );
 
+
 -- fill users table with sample data
 INSERT INTO users (name, surname, email) VALUES
 ('John', 'Doe', 'john.doe@example.com'),
@@ -26,6 +27,7 @@ INSERT INTO users (name, surname, email) VALUES
 ('Bel', 'Bianchi', 'belubelu@gmail.com'),
 ('Kevin', 'Nurray', 'kevinnurray@proton.email'),
 ('Elliot', 'Anderson', 'elliotanderson@hotmail.com'),
+('Susana', 'Gimenez', 'susanita@yahoo.com.ar'),
 ('Albert', 'Brown', 'albet_brown_02@hotmail.com');
 
 -- fill organizations table with sample data
@@ -33,17 +35,21 @@ INSERT INTO organizations (name) VALUES
 ('Veritone'),
 ('Slingr'),
 ('Marvik'),
+('Google'),
+('Amazon'),
 ('Hackerone');
 
 -- assign users to organizations (many-to-many relationship)
 INSERT INTO user_organizations (user_id, organization_id) VALUES
-(1, 1), 
-(2, 2),
-(2, 1), 
+(1, 1), -- John Doe belongs to Veritone
+(2, 2), -- Guido Enrique belongs to Slingr
+(2, 1), -- and go on ...
 (2, 4), 
 (3, 3), 
-(4, 4), 
+(4, 4),
+(4, 5), 
 (5, 1), 
-(6, 2); 
-
+(6, 2),
+(7, 1),
+(7, 2);
 
